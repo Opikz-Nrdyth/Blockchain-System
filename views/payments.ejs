@@ -1,0 +1,72 @@
+<%- include('partials/header') %>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+  <div class="bg-white rounded-lg shadow-md p-6">
+    <h2 class="text-2xl font-bold mb-4 text-gray-800">
+      <i class="fas fa-money-bill-transfer"></i> Create Transaction
+    </h2>
+    <form action="/payments" method="POST" class="space-y-4">
+      <div>
+        <label class="block text-gray-700 font-bold mb-2">From Address</label>
+        <input
+          type="text"
+          name="fromAddress"
+          required
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+      <div>
+        <label class="block text-gray-700 font-bold mb-2">To Address</label>
+        <input
+          type="text"
+          name="toAddress"
+          required
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+      <div>
+        <label class="block text-gray-700 font-bold mb-2">Amount</label>
+        <input
+          type="number"
+          name="amount"
+          step="0.01"
+          required
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+      <button
+        type="submit"
+        class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition"
+      >
+        <i class="fas fa-paper-plane"></i> Send Transaction
+      </button>
+    </form>
+  </div>
+
+  <div class="bg-white rounded-lg shadow-md p-6">
+    <h2 class="text-2xl font-bold mb-4 text-gray-800">
+      <i class="fas fa-clock"></i> Pending Transactions
+    </h2>
+    <div class="space-y-4">
+      <% if (transactions.length === 0) { %>
+      <p class="text-gray-500 text-center py-8">No pending transactions</p>
+      <% } else { %> <% transactions.forEach(tx => { %>
+      <div class="border border-gray-200 rounded-lg p-4">
+        <div class="flex justify-between items-center mb-2">
+          <span class="font-bold text-blue-600">Transaction</span>
+          <span class="text-green-600 font-bold"><%= tx.amount %> Coins</span>
+        </div>
+        <div class="text-sm text-gray-600">
+          <p>
+            <strong>From:</strong> <%= tx.fromAddress ?
+            tx.fromAddress.substring(0, 20) + '...' : 'System' %>
+          </p>
+          <p><strong>To:</strong> <%= tx.toAddress.substring(0, 20) %>...</p>
+        </div>
+      </div>
+      <% }) %> <% } %>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

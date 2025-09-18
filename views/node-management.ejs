@@ -1,0 +1,156 @@
+<!-- views/node-management.ejs -->
+<%- include('partials/header') %>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+  <div class="bg-white rounded-lg shadow-md p-6">
+    <h2 class="text-2xl font-bold mb-4 text-gray-800">
+      <i class="fas fa-network-wired"></i> Node Management
+    </h2>
+
+    <div class="mb-6">
+      <h3 class="text-lg font-bold mb-2">Node Information</h3>
+      <div id="nodeInfo" class="bg-gray-50 p-4 rounded-lg">
+        <p><strong>Node ID:</strong> <span id="nodeId">Loading...</span></p>
+        <p><strong>Connected Peers:</strong> <span id="peerCount">0</span></p>
+        <p><strong>Chain Length:</strong> <span id="chainLength">0</span></p>
+        <p>
+          <strong>Pending Transactions:</strong> <span id="pendingTx">0</span>
+        </p>
+      </div>
+    </div>
+
+    <div class="mb-6">
+      <h3 class="text-lg font-bold mb-2">Connect to Peer</h3>
+      <form id="connectPeerForm" class="space-y-4">
+        <input
+          type="text"
+          id="peerAddress"
+          placeholder="ws://localhost:5002"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg"
+        />
+        <button
+          type="submit"
+          class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
+        >
+          <i class="fas fa-plug"></i> Connect to Peer
+        </button>
+      </form>
+    </div>
+
+    <div class="space-y-2">
+      <button
+        onclick="syncBlockchain()"
+        class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700"
+      >
+        <i class="fas fa-sync"></i> Sync Blockchain
+      </button>
+      <button
+        onclick="refreshNodeInfo()"
+        class="w-full bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-700"
+      >
+        <i class="fas fa-refresh"></i> Refresh Info
+      </button>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-lg shadow-md p-6">
+    <h2 class="text-2xl font-bold mb-4 text-gray-800">
+      <i class="fas fa-users"></i> Connected Peers
+    </h2>
+    <div id="peersList" class="space-y-2">
+      <p class="text-gray-500">No peers connected</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  async function loadNodeInfo() {
+    try {
+      const response = await fetch("/node-info");
+      const data = await response.json();
+
+      document.getElementById("nodeId").textContent = data.nodeId;
+      document.getElementById("peerCount").textContent = data.peers;
+      document.getElementById("chainLength").textContent = data.chainLength;
+      document.getElementById("pendingTx").textContent =
+        data.pendingTransactions;
+    } catch (error) {
+      console.error("Error loading node info:", error);
+    }
+  }
+
+  async function loadPeers() {
+    try {
+      const response = await fetch("/peers");
+      const data = await response.json();
+
+      const peersList = document.getElementById("peersList");
+      if (data.peers.length === 0) {
+        peersList.innerHTML = '<p class="text-gray-500">No peers connected</p>';
+      } else {
+        peersList.innerHTML = data.peers
+          .map(
+            (peer) =>
+              `<div class="bg-gray-50 p-3 rounded border">
+                    <i class="fas fa-circle text-green-500"></i> ${peer}
+                </div>`
+          )
+          .join("");
+      }
+    } catch (error) {
+      console.error("Error loading peers:", error);
+    }
+  }
+
+  document
+    .getElementById("connectPeerForm")
+    .addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const peerAddress = document.getElementById("peerAddress").value;
+
+      try {
+        const response = await fetch("/connect-node", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ peerAddress }),
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+          alert("Connected to peer successfully!");
+          loadNodeInfo();
+          loadPeers();
+        } else {
+          alert("Error: " + result.error);
+        }
+      } catch (error) {
+        alert("Error connecting to peer");
+      }
+    });
+
+  async function syncBlockchain() {
+    try {
+      const response = await fetch("/sync", { method: "POST" });
+      const result = await response.json();
+      alert(result.message);
+    } catch (error) {
+      alert("Error syncing blockchain");
+    }
+  }
+
+  function refreshNodeInfo() {
+    loadNodeInfo();
+    loadPeers();
+  }
+
+  // Load info on page load
+  loadNodeInfo();
+  loadPeers();
+
+  setInterval(() => {
+    loadNodeInfo();
+    loadPeers();
+  }, 3000);
+</script>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,142 @@
+<%- include('partials/header') %>
+
+<div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-8">
+  <h2 class="text-3xl font-bold mb-6 text-gray-800 text-center">
+    <i class="fas fa-wallet"></i> Wallet Generator
+  </h2>
+
+  <div class="text-center mb-6">
+    <button
+      onclick="generateWallet()"
+      class="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition text-lg"
+    >
+      <i class="fas fa-magic"></i> Generate New Wallet
+    </button>
+  </div>
+
+  <div id="walletResult" class="hidden">
+    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+      <h3 class="font-bold text-yellow-800 mb-2">
+        <i class="fas fa-exclamation-triangle"></i> IMPORTANT: Save Your Private
+        Key!
+      </h3>
+      <p class="text-yellow-700 text-sm">
+        Jangan pernah bagikan private key ini kepada siapapun. Private key ini
+        digunakan untuk mengakses wallet Anda.
+      </p>
+    </div>
+
+    <div class="space-y-4">
+      <div>
+        <label class="block text-gray-700 font-bold mb-2"
+          >Wallet Address:</label
+        >
+        <div class="flex">
+          <input
+            type="text"
+            id="walletAddress"
+            readonly
+            class="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg bg-gray-50"
+          />
+          <button
+            onclick="copyToClipboard('walletAddress')"
+            class="bg-gray-600 text-white px-4 py-2 rounded-r-lg hover:bg-gray-700 transition"
+          >
+            <i class="fas fa-copy"></i>
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-gray-700 font-bold mb-2">Private Key:</label>
+        <div class="flex">
+          <input
+            type="password"
+            id="privateKey"
+            readonly
+            class="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg bg-gray-50"
+          />
+          <button
+            onclick="togglePrivateKey()"
+            class="bg-gray-600 text-white px-4 py-2 hover:bg-gray-700 transition"
+          >
+            <i class="fas fa-eye" id="eyeIcon"></i>
+          </button>
+          <button
+            onclick="copyToClipboard('privateKey')"
+            class="bg-gray-600 text-white px-4 py-2 rounded-r-lg hover:bg-gray-700 transition"
+          >
+            <i class="fas fa-copy"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-6 text-center">
+      <button
+        onclick="useThisWallet()"
+        class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition"
+      >
+        <i class="fas fa-check"></i> Gunakan Wallet Ini
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentWallet = null;
+
+  function generateWallet() {
+    fetch("/generate-wallet")
+      .then((response) => response.json())
+      .then((data) => {
+        currentWallet = data;
+        document.getElementById("walletAddress").value = data.address;
+        document.getElementById("privateKey").value = data.privateKey;
+        document.getElementById("walletResult").classList.remove("hidden");
+      })
+      .catch((error) => {
+        alert("Error generating wallet");
+      });
+  }
+
+  function copyToClipboard(elementId) {
+    const element = document.getElementById(elementId);
+    element.type = "text";
+    element.select();
+    document.execCommand("copy");
+    element.type = elementId === "privateKey" ? "password" : "text";
+
+    // Show feedback
+    const button = event.target.closest("button");
+    const originalHTML = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-check"></i>';
+    setTimeout(() => {
+      button.innerHTML = originalHTML;
+    }, 2000);
+  }
+
+  function togglePrivateKey() {
+    const privateKeyInput = document.getElementById("privateKey");
+    const eyeIcon = document.getElementById("eyeIcon");
+
+    if (privateKeyInput.type === "password") {
+      privateKeyInput.type = "text";
+      eyeIcon.classList.remove("fa-eye");
+      eyeIcon.classList.add("fa-eye-slash");
+    } else {
+      privateKeyInput.type = "password";
+      eyeIcon.classList.remove("fa-eye-slash");
+      eyeIcon.classList.add("fa-eye");
+    }
+  }
+
+  function useThisWallet() {
+    if (currentWallet) {
+      // Redirect ke halaman tambah user dengan wallet address terisi
+      window.location.href = `/users?wallet=${currentWallet.address}`;
+    }
+  }
+</script>
+
+<%- include('partials/footer') %>

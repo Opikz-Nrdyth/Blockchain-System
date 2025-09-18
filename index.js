@@ -197,10 +197,11 @@ app.post("/mine", (req, res) => {
       user.balance = blockchain.getBalanceOfAddress(miningRewardAddress);
       saveUsers();
     }
-    res.json({
-      message: "Block mined successfully and broadcasted",
-      block: blockchain.getLatestBlock(),
-    });
+    // res.json({
+    //   message: "Block mined successfully and broadcasted",
+    //   block: blockchain.getLatestBlock(),
+    // });
+    res.redirect("/");
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

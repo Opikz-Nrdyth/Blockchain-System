@@ -23,13 +23,11 @@ class P2PServer {
     this.sockets.push(socket);
     console.log("Socket connected");
 
-    this.shareNodeList(socket);
+    socket.send(JSON.stringify({ type: "request-chain" }));
 
-    // Event handlers
+    this.shareNodeList(socket);
     this.messageHandler(socket);
     this.errorHandler(socket);
-
-    // Send current blockchain to new node
     this.sendChain(socket);
   }
 
@@ -58,6 +56,9 @@ class P2PServer {
           if (this.blockchain.forceSync(data.chain)) {
             console.log("Chain synced!");
           }
+          break;
+        case "request-chain": // TAMBAHKAN
+          this.sendChain(socket);
           break;
         case "transaction":
           this.blockchain.addTransaction(data.transaction);

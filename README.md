@@ -57,9 +57,15 @@ npm run node1
 
 Cek IP di notification → share ke laptop → connect!
 
-🔗 Endpoint API
-GET / - Dashboard
-GET /users - Daftar user
-GET /node-management - Management node
-POST /mine - Mine block baru
-GET /balance/:address - Cek balance
+---
+
+## 📄 Lisensi
+
+MIT License - bebas digunakan untuk apapun
+👨‍💻 Developed by Opik Studio
+
+Blockchain Enthusiast | Full Stack Developer
+
+https://github.com/Opikz-Nrdyth/
+
+https://opikstudio.my.id/
